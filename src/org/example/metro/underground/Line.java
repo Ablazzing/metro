@@ -1,76 +1,56 @@
 package org.example.metro.underground;
 
-import org.example.metro.exceptions.StationNotExistsException;
-
 import java.time.Duration;
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import static org.example.metro.underground.util.UndergroundUtil.getLastValueFromLinkedHashSet;
+import static org.example.metro.underground.UndergroundValidatorUtil.checkPreviousStationIsLastInLine;
+
 public class Line {
-    private String color;
-    private LinkedList<Station> stations = new LinkedList<>();
+    private final LineColor lineColor;
+    private final LinkedHashSet<Station> stations = new LinkedHashSet<>();
+    private final Metro metro;
 
-    protected Line(String color) {
-        this.color = color;
+    protected Line(LineColor lineColor, Metro metro) {
+        this.lineColor = lineColor;
+        this.metro = metro;
     }
 
-    protected void addStation(Station station) {
-        stations.add(station);
-    }
-
-    protected Station createFirstStation(String stationName, Set<Line> changeLines) {
-        Station station = new Station(stationName, changeLines);
+    protected Station createFirstStation(String stationName, Set<Station> changeLineStations) {
+        Station station = new Station(stationName, this, metro, changeLineStations);
         stations.add(station);
         return station;
     }
 
-    protected Station createLastStation(String stationName, Duration timeToStation, Set<Line> changeLines) {
-        Station station = new Station(stationName, changeLines);
-        Station prevStation = stations.getLast();
-        if (prevStation == null) {
-            throw new RuntimeException("Previous station not exists in this line");
-        }
-        if (prevStation.getNextStation() != null) {
-            throw new RuntimeException("Previous station is not last in line");
-        }
+    protected Station createFirstStation(String stationName) {
+        return createFirstStation(stationName, null);
+    }
+
+    protected Station createLastStation(String stationName, Duration timeToStation) {
+        return createLastStation(stationName, timeToStation, null);
+    }
+
+    protected Station createLastStation(String stationName,
+                                        Duration timeToStation,
+                                        Set<Station> changeLineStations) {
+        Station prevStation = getLastValueFromLinkedHashSet(stations);
+        checkPreviousStationIsLastInLine(prevStation);
+        Station newStation = new Station(stationName, this, metro, changeLineStations);
         prevStation.setTimeToNextStation(timeToStation);
-        station.setPrevStation(prevStation);
-        stations.add(station);
-        return station;
+        prevStation.setNextStation(newStation);
+        newStation.setPrevStation(prevStation);
+        stations.add(newStation);
+        return newStation;
     }
 
-    protected Station createBetweenStation(String newStationName, String prevStationName, Duration timeToStation,
-                                        Set<Line> changeLines) {
-        Station station = new Station(newStationName, changeLines);
-        Station prevStation = stations.stream().filter(e -> e.getName().equals(prevStationName))
-                .findFirst().orElseThrow(() -> new StationNotExistsException(prevStationName));
-        Station nextStation = prevStation.getNextStation();
-        if (nextStation == null) {
-            throw new RuntimeException("Station " + prevStationName + " has no next station");
-        }
-        prevStation.setTimeToNextStation(timeToStation);
-        prevStation.setNextStation(station);
-        nextStation.setPrevStation(station);
-
-        Duration oldDurationBetweenStations = prevStation.getTimeToNextStation();
-        Duration durationToNextStation = oldDurationBetweenStations.minus(timeToStation)
-                .plusSeconds(30);
-        if (durationToNextStation.getSeconds() <= 30) {
-            throw new RuntimeException("Duration between new station and next station less than 30 seconds");
-        }
-        station.setTimeToNextStation(durationToNextStation);
-        station.setPrevStation(prevStation);
-        station.setNextStation(nextStation);
-        return station;
-    }
-
-    public LinkedList<Station> getStations() {
+    protected LinkedHashSet<Station> getStations() {
         return stations;
     }
 
-    public String getColor() {
-        return color;
+    protected LineColor getColor() {
+        return lineColor;
     }
 
     @Override
@@ -78,18 +58,18 @@ public class Line {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Line line = (Line) o;
-        return Objects.equals(color, line.color);
+        return Objects.equals(lineColor, line.lineColor);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(color);
+        return Objects.hash(lineColor);
     }
 
     @Override
     public String toString() {
         return "Line{" +
-                "color='" + color + '\'' +
+                "color='" + lineColor + '\'' +
                 ", stations=" + stations +
                 '}';
     }

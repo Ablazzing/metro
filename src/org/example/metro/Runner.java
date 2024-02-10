@@ -2,33 +2,41 @@ package org.example.metro;
 
 import org.example.metro.underground.Line;
 import org.example.metro.underground.Metro;
+import org.example.metro.underground.Station;
+
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Set;
+
+import static org.example.metro.underground.LineColor.BLUE;
+import static org.example.metro.underground.LineColor.RED;
 
 public class Runner {
     public static void main(String[] args) {
         Metro metro = new Metro("Пермь");
-        Line line = metro.createLine("Красная");
-        metro.createFirstStation(line.getColor(), "Спортивная", null);
-        metro.createLastStation(line.getColor(), "Медведковская", "2M21S", null);
-        metro.createLastStation(line.getColor(), "Молодежная", "1M58S", null);
-        metro.createLastStation(line.getColor(), "Пермь 1", "3M", null);
-        metro.createLastStation(line.getColor(), "Пермь 2", "2M10S", null);
-        metro.createLastStation(line.getColor(), "Дворец Культуры", "4M26S", null);
+        metro.createLine(RED);
+        metro.createLine(BLUE);
+        metro.createFirstStation(RED.getValue(), "Спортивная");
+        metro.createLastStation(RED.getValue(), "Медведковская", "2M21S");
+        metro.createLastStation(RED.getValue(), "Молодежная", "1M58S");
+        Station perm1 = metro.createLastStation(RED.getValue(), "Пермь 1", "3M");
+        metro.createLastStation(RED.getValue(), "Пермь 2", "2M10S");
+        metro.createLastStation(RED.getValue(), "Дворец Культуры", "4M26S");
 
-        Line blueLine = metro.createLine("Синяя");
-        //-Пацанская
-        // | Перегон 1 минута 30 секунд
-        //-Улица Кирова
-        // | Перегон 1 минута 47 секунд
-        //-Тяжмаш
-        // | Перегон 3 минуты 19 секунд
-        //-Нижнекамская
-        // | Перегон 1 минута 48 секунд
-        //-Соборная
-        metro.createFirstStation(blueLine.getColor(), "Пацанская", null);
-        metro.createLastStation(blueLine.getColor(), "Улица Кирова", "1M30S", null);
-        metro.createLastStation(blueLine.getColor(), "Тяжмаш", "1M47S", null);
-        metro.createLastStation(blueLine.getColor(), "Нижнекамская", "3M19S", null);
-        metro.createLastStation(blueLine.getColor(), "Соборная", "1M48S", null);
+        metro.createFirstStation(BLUE.getValue(), "Пацанская");
+        metro.createLastStation(BLUE.getValue(), "Улица Кирова", "1M30S");
+        Station tygMash = metro.createLastStation(BLUE.getValue(), "Тяжмаш", "1M47S", Set.of("Пермь 1"));
+        metro.createLastStation(BLUE.getValue(), "Нижнекамская", "3M19S");
+        metro.createLastStation(BLUE.getValue(), "Соборная", "1M48S");
+        perm1.setChangeLineStations(Set.of(tygMash));
         System.out.print(metro);
+
+        perm1.saleSubscription(LocalDate.now());
+        perm1.saleSubscription(LocalDate.now().plus(3, ChronoUnit.MONTHS));
+        perm1.saleSubscription(LocalDate.now());
+        metro.printAllIncomes();
+
+        List.of(1, 1, 1).stream().sorted().forEach(e -> System.out.println(e));
     }
 }

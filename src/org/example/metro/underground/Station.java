@@ -1,53 +1,65 @@
 package org.example.metro.underground;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.example.metro.underground.UndergroundValidatorUtil.checkNonNullValues;
 
 public class Station {
-    private String name;
+    private final String name;
     private Station prevStation;
     private Station nextStation;
     private Duration timeToNextStation;
-    private Set<Line> changeLines;
+    private Set<Station> changeLineStations;
+    private final Line line;
+    private final Metro metro;
+    private final Cashier cashier;
 
-    public Station(String name) {
+    protected Station(String name, Line line, Metro metro, Set<Station> changeLineStations) {
+        checkNonNullValues(name, line, metro);
         this.name = name;
+        this.changeLineStations = changeLineStations;
+        this.line = line;
+        this.metro = metro;
+        this.cashier = new Cashier(metro);
     }
 
-    public Station(String name, Set<Line> changeLines) {
-        this.name = name;
-        this.changeLines = changeLines;
+    public Line getLine() {
+        return line;
     }
 
-    public Station(String name, Station prevStation, Station nextStation, Duration timeToNextStation) {
-        this.name = name;
-        this.prevStation = prevStation;
-        this.nextStation = nextStation;
-        this.timeToNextStation = timeToNextStation;
+    public void saleOneTicket(String stationStart, String stationFinish, LocalDate date) {
+        cashier.sellTicket(stationStart, stationFinish, date);
     }
 
-    public Set<Line> getChangeLines() {
-        return changeLines;
+    public Subscription saleSubscription(LocalDate date) {
+        return cashier.sellNewSubscription(date);
     }
 
-    public void setChangeLines(Set<Line> changeLines) {
-        this.changeLines = changeLines;
+    public void refreshSubscription(String subscriptionNumber, LocalDate date) {
+        cashier.refreshSubscription(subscriptionNumber, date);
+    }
+
+    public Set<Station> getChangeLineStations() {
+        return changeLineStations;
+    }
+
+    public void setChangeLineStations(Set<Station> changeLineStations) {
+        this.changeLineStations = changeLineStations;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public Station getPrevStation() {
         return prevStation;
     }
 
-    public void setPrevStation(Station prevStation) {
+    protected void setPrevStation(Station prevStation) {
         this.prevStation = prevStation;
     }
 
@@ -55,7 +67,7 @@ public class Station {
         return nextStation;
     }
 
-    public void setNextStation(Station nextStation) {
+    protected void setNextStation(Station nextStation) {
         this.nextStation = nextStation;
     }
 
@@ -63,8 +75,12 @@ public class Station {
         return timeToNextStation;
     }
 
-    public void setTimeToNextStation(Duration timeToNextStation) {
+    protected void setTimeToNextStation(Duration timeToNextStation) {
         this.timeToNextStation = timeToNextStation;
+    }
+
+    public Cashier getCashier() {
+        return cashier;
     }
 
     @Override
@@ -84,6 +100,16 @@ public class Station {
     public String toString() {
         return "Station{" +
                 "name='" + name + '\'' +
+                String.format(", changeLines=%s", getChangeLineColors()) + "'" +
                 '}';
+    }
+
+    private String getChangeLineColors() {
+        if (changeLineStations == null || changeLineStations.isEmpty()) {
+            return null;
+        }
+        return changeLineStations.stream()
+                .map(station -> station.getLine().getColor().getValue())
+                .collect(Collectors.joining(","));
     }
 }

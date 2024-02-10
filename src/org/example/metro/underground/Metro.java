@@ -198,13 +198,13 @@ public class Metro {
     private int countStagesOnSameLine(Station stationStart, Station stationFinish) {
         checkNotTheSameStations(stationStart, stationFinish);
 
-        int nextStation = getStationByName(stationStart,
+        int nextStation = countRunsHelper(stationStart,
                 stationFinish, Station::getNextStation);
         if (nextStation > 0) {
             return nextStation;
         }
 
-        int prevStation = getStationByName(stationStart,
+        int prevStation = countRunsHelper(stationStart,
                 stationFinish, Station::getPrevStation);
         if (prevStation > 0) {
             return prevStation;
@@ -217,9 +217,9 @@ public class Metro {
     /**
      * Подсчет перегонов между станциями в одну сторону
      */
-    private int getStationByName(Station stationStart,
-                                 Station stationFinish,
-                                 Function<Station, Station> getNextStationFunc) {
+    private int countRunsHelper(Station stationStart,
+                                Station stationFinish,
+                                Function<Station, Station> getNextStationFunc) {
         Station nextStation = getNextStationFunc.apply(stationStart);
         int count = 0;
         while (true) {

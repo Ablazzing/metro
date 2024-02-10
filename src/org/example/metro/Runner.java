@@ -1,12 +1,10 @@
 package org.example.metro;
 
-import org.example.metro.underground.Line;
 import org.example.metro.underground.Metro;
 import org.example.metro.underground.Station;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Set;
 
 import static org.example.metro.underground.LineColor.BLUE;
@@ -30,13 +28,15 @@ public class Runner {
         metro.createLastStation(BLUE.getValue(), "Нижнекамская", "3M19S");
         metro.createLastStation(BLUE.getValue(), "Соборная", "1M48S");
         perm1.setChangeLineStations(Set.of(tygMash));
-        System.out.print(metro);
+        System.out.println(metro);
 
         perm1.saleSubscription(LocalDate.now());
         perm1.saleSubscription(LocalDate.now().plus(3, ChronoUnit.MONTHS));
+        perm1.saleSubscription(LocalDate.now().plus(1, ChronoUnit.MONTHS));
+        perm1.saleSubscription(LocalDate.now().plus(2, ChronoUnit.MONTHS));
         perm1.saleSubscription(LocalDate.now());
         metro.printAllIncomes();
 
-        List.of(1, 1, 1).stream().sorted().forEach(e -> System.out.println(e));
+
     }
 }

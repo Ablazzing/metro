@@ -2,6 +2,9 @@ package org.example.metro.underground;
 
 import java.time.LocalDate;
 
+/**
+ * Абонемент в метро
+ */
 public class Subscription {
     private final String number;
     private LocalDate startDate;

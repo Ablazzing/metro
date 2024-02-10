@@ -7,10 +7,13 @@ import java.util.Map;
 
 import static java.math.BigDecimal.ZERO;
 
+/**
+ * Касса станции метро
+ */
 public class Cashier {
-    private final static BigDecimal TICKET_FEE = new BigDecimal(20);
-    private final static BigDecimal PRICE_RUN = new BigDecimal(5);
-    private final static BigDecimal SUBSCRIPTION_PRICE = new BigDecimal(3_000);
+    private static final BigDecimal TICKET_FEE = new BigDecimal(20);
+    private static final BigDecimal PRICE_RUN = new BigDecimal(5);
+    private static final BigDecimal SUBSCRIPTION_PRICE = new BigDecimal(3_000);
     private final Map<LocalDate, BigDecimal> sales = new HashMap<>();
     private final Metro metro;
 
@@ -18,21 +21,30 @@ public class Cashier {
         this.metro = metro;
     }
 
-    protected void sellTicket(String startStation, String finishStation, LocalDate date) {
+    /**
+     * Продажа билета
+     */
+    protected void sellTicket(String startStation, String finishStation, LocalDate sellDate) {
         int countRuns = metro.countStages(startStation, finishStation);
         BigDecimal ticketPrice = PRICE_RUN.multiply(new BigDecimal(countRuns)).add(TICKET_FEE);
-        addValue(date, ticketPrice);
+        addValue(sellDate, ticketPrice);
     }
 
+    /**
+     * Продажа нового абонемента
+     */
     protected Subscription sellNewSubscription(LocalDate startSubscriptionDate) {
         Subscription subscription = metro.addSubscription(startSubscriptionDate);
         addValue(startSubscriptionDate, SUBSCRIPTION_PRICE);
         return subscription;
     }
 
-    protected void refreshSubscription(String subscriptionNumber, LocalDate startSubscriptionDate) {
-        metro.refreshSubscription(subscriptionNumber, startSubscriptionDate);
-        addValue(startSubscriptionDate, SUBSCRIPTION_PRICE);
+    /**
+     * Продление существующего абонемента
+     */
+    protected void refreshSubscription(String subscriptionNumber, LocalDate sellDate) {
+        metro.refreshSubscription(subscriptionNumber, sellDate);
+        addValue(sellDate, SUBSCRIPTION_PRICE);
     }
 
     private void addValue(LocalDate date, BigDecimal value) {

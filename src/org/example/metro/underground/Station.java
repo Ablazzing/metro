@@ -8,39 +8,51 @@ import java.util.stream.Collectors;
 
 import static org.example.metro.underground.UndergroundValidatorUtil.checkNonNullValues;
 
+/**
+ * Станция метро
+ */
 public class Station {
     private final String name;
+    private final MetroLine metroLine;
+    private final Metro metro;
+    private final Cashier cashier;
     private Station prevStation;
     private Station nextStation;
     private Duration timeToNextStation;
     private Set<Station> changeLineStations;
-    private final Line line;
-    private final Metro metro;
-    private final Cashier cashier;
 
-    protected Station(String name, Line line, Metro metro, Set<Station> changeLineStations) {
-        checkNonNullValues(name, line, metro);
+    protected Station(String name, MetroLine metroLine, Metro metro, Set<Station> changeLineStations) {
+        checkNonNullValues(name, metroLine, metro);
         this.name = name;
         this.changeLineStations = changeLineStations;
-        this.line = line;
+        this.metroLine = metroLine;
         this.metro = metro;
         this.cashier = new Cashier(metro);
     }
 
-    public Line getLine() {
-        return line;
-    }
-
+    /**
+     * Продажа билета
+     */
     public void saleOneTicket(String stationStart, String stationFinish, LocalDate date) {
         cashier.sellTicket(stationStart, stationFinish, date);
     }
 
+    /**
+     * Продажа абонемента
+     */
     public Subscription saleSubscription(LocalDate date) {
         return cashier.sellNewSubscription(date);
     }
 
+    /**
+     * Продление абонемента
+     */
     public void refreshSubscription(String subscriptionNumber, LocalDate date) {
         cashier.refreshSubscription(subscriptionNumber, date);
+    }
+
+    public MetroLine getLine() {
+        return metroLine;
     }
 
     public Set<Station> getChangeLineStations() {
@@ -98,12 +110,15 @@ public class Station {
 
     @Override
     public String toString() {
-        return "Station{" +
-                "name='" + name + '\'' +
-                String.format(", changeLines=%s", getChangeLineColors()) + "'" +
-                '}';
+        return "Station{"
+               + "name='" + name + '\''
+               + String.format(", changeLines=%s", getChangeLineColors()) + "'"
+               + '}';
     }
 
+    /**
+     * Получение всех цветов линий на пересадку в виде текста
+     */
     private String getChangeLineColors() {
         if (changeLineStations == null || changeLineStations.isEmpty()) {
             return null;

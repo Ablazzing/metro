@@ -4,8 +4,8 @@ import java.time.Duration;
 import java.util.LinkedHashSet;
 
 public class UndergroundUtil {
-    public static Duration parseTimeToStation(String timeToStationText) {
-        return Duration.parse("PT" + timeToStationText);
+    public static Duration parseTimeToDuration(String textTime) {
+        return Duration.parse("PT" + textTime);
     }
 
     public static <T> T getLastValueFromLinkedHashSet(LinkedHashSet<T> linkedHashSet) {

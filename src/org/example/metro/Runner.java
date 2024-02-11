@@ -12,6 +12,7 @@ import static org.example.metro.underground.LineColor.RED;
 
 public class Runner {
     public static void main(String[] args) {
+
         Metro metro = new Metro("Пермь");
         metro.createLine(RED);
         metro.createLine(BLUE);

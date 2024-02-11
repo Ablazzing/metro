@@ -5,6 +5,7 @@ import org.example.metro.exceptions.LineNotExistsException;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,11 +15,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.example.metro.underground.UndergroundValidatorUtil.checkDuration;
-import static org.example.metro.underground.UndergroundValidatorUtil.checkLineIsNotEmpty;
+import static org.example.metro.underground.UndergroundValidatorUtil.checkLineIsEmpty;
 import static org.example.metro.underground.UndergroundValidatorUtil.checkLineNotExist;
 import static org.example.metro.underground.UndergroundValidatorUtil.checkNotTheSameStations;
 import static org.example.metro.underground.UndergroundValidatorUtil.checkStationNotExists;
-import static org.example.metro.underground.util.UndergroundUtil.parseTimeToStation;
+import static org.example.metro.underground.util.UndergroundUtil.parseTimeToDuration;
 
 /**
  * Метрополитен
@@ -27,7 +28,7 @@ public class Metro {
     private static final int LIMIT_SUBSCRIPTIONS = 10_000;
     private static final String TICKET_NUMBER_PATTERN = "a%04d";
     private final String city;
-    private final HashSet<MetroLine> metroLines = new HashSet<>();
+    private final Set<MetroLine> metroLines = new HashSet<>();
     private final Map<String, Subscription> subscriptions = new HashMap<>();
     private int countSoldSubscription = 0; //Количество проданных абонементов
 
@@ -55,7 +56,7 @@ public class Metro {
                                       Set<String> changeLineStations) {
         checkStationNotExists(metroLines, stationName);
         MetroLine metroLine = findLineByColor(lineColor);
-        checkLineIsNotEmpty(metroLine);
+        checkLineIsEmpty(metroLine);
         if (changeLineStations == null) {
             return metroLine.createFirstStation(stationName);
         }
@@ -77,10 +78,10 @@ public class Metro {
                                      String stationName,
                                      String timeToStationText,
                                      Set<String> changeLineStations) {
-        Duration timeToNextStation = parseTimeToStation(timeToStationText);
+        checkStationNotExists(metroLines, stationName);
+        Duration timeToNextStation = parseTimeToDuration(timeToStationText);
         checkDuration(timeToNextStation);
         MetroLine metroLine = findLineByColor(lineColor);
-        checkStationNotExists(metroLines, stationName);
         if (changeLineStations == null) {
             return metroLine.createLastStation(stationName, timeToNextStation);
         }
@@ -149,6 +150,18 @@ public class Metro {
                 .entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .forEach(System.out::println);
+    }
+
+    /**
+     * Проверка действительности абонемента
+     */
+    public boolean isSubscriptionActive(String subscriptionNumber, LocalDate checkDate) {
+        if (subscriptions.containsKey(subscriptionNumber)) {
+            LocalDate startDate = subscriptions.get(subscriptionNumber).getStartDate();
+            return (startDate.isAfter(checkDate) || startDate.isEqual(checkDate))
+                    && startDate.plus(1, ChronoUnit.MONTHS).isBefore(checkDate);
+        }
+        return false;
     }
 
     /**
@@ -234,7 +247,7 @@ public class Metro {
             if (nextStation == stationFinish) {
                 return count;
             }
-            nextStation = getNextStationFunc.apply(stationStart);
+            nextStation = getNextStationFunc.apply(nextStation);
         }
     }
 

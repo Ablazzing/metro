@@ -4,12 +4,13 @@ import org.example.metro.exceptions.LineAlreadyExistsException;
 import org.example.metro.exceptions.StationAlreadyExistsException;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 
 public class UndergroundValidatorUtil {
 
-    public static void checkLineIsNotEmpty(MetroLine metroLine) {
+    public static void checkLineIsEmpty(MetroLine metroLine) {
         if (!metroLine.getStations().isEmpty()) {
             throw new RuntimeException("Line already has stations, cannot create first station");
         }
@@ -25,9 +26,7 @@ public class UndergroundValidatorUtil {
     }
 
     public static void checkNonNullValues(Object... objects) {
-        for (Object object : objects) {
-            Objects.requireNonNull(object);
-        }
+        Arrays.stream(objects).forEach(Objects::requireNonNull);
     }
 
     public static void checkDuration(Duration timeToStation) {
